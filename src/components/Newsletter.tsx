@@ -13,19 +13,39 @@ const Newsletter = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase
-      .from("newsletter_subscribers")
-      .insert([{ email }]);
+    try {
+      // Save to database
+      const { error: dbError } = await supabase
+        .from("newsletter_subscribers")
+        .insert([{ email }]);
 
-    if (error) {
-      if (error.code === "23505") {
-        toast.error("You're already subscribed!");
-      } else {
-        toast.error("Failed to subscribe. Please try again.");
+      if (dbError) {
+        if (dbError.code === "23505") {
+          toast.error("You're already subscribed!");
+          setLoading(false);
+          return;
+        }
+        throw dbError;
       }
-    } else {
-      toast.success("Successfully subscribed to our newsletter!");
+
+      // Send confirmation email
+      const { error: emailError } = await supabase.functions.invoke(
+        "send-newsletter-confirmation",
+        { body: { email } }
+      );
+
+      if (emailError) {
+        console.error("Email error:", emailError);
+        // Don't fail the whole operation if email fails
+        toast.success("Subscribed! (Email confirmation pending)");
+      } else {
+        toast.success("Successfully subscribed! Check your email for confirmation.");
+      }
+
       setEmail("");
+    } catch (error: any) {
+      console.error("Subscription error:", error);
+      toast.error("Failed to subscribe. Please try again.");
     }
 
     setLoading(false);
