@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, User, Menu, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/contexts/CartContext";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,6 +15,7 @@ import {
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { totalItems, setIsCartOpen } = useCart();
 
   const collections = [
     { name: "Floral Collection", href: "/category/floral", description: "Delicate and romantic scents" },
@@ -90,8 +93,21 @@ const Navbar = () => {
               <User className="h-5 w-5" />
             </Button>
             
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="relative"
+              onClick={() => setIsCartOpen(true)}
+            >
               <ShoppingCart className="h-5 w-5" />
+              {totalItems > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {totalItems}
+                </Badge>
+              )}
             </Button>
 
             {/* Mobile Menu Button */}

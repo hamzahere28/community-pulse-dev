@@ -5,11 +5,13 @@ import CategoryShowcase from "@/components/CategoryShowcase";
 import FragranceRecommender from "@/components/FragranceRecommender";
 import ReviewSection from "@/components/ReviewSection";
 import Newsletter from "@/components/Newsletter";
+import CartDrawer from "@/components/CartDrawer";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <CartDrawer />
       <Hero />
       <FeaturedProducts />
       <CategoryShowcase />

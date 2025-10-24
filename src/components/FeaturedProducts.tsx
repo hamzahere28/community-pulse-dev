@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { useState } from "react";
 
 const products = [
   {
@@ -56,6 +58,32 @@ const products = [
 ];
 
 const FeaturedProducts = () => {
+  const { addItem, setIsCartOpen } = useCart();
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+
+  const toggleFavorite = (id: number) => {
+    setFavorites(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleAddToCart = (product: typeof products[0]) => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category,
+    });
+    setIsCartOpen(true);
+  };
+
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
@@ -66,17 +94,25 @@ const FeaturedProducts = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product) => (
-            <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300">
-              <Link to={`/product/${product.id}`}>
-                <div className="relative overflow-hidden aspect-square">
+            <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20">
+              <div className="relative overflow-hidden aspect-square">
+                <Link to={`/product/${product.id}`}>
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                   />
-                  <Badge className="absolute top-4 left-4">{product.category}</Badge>
-                </div>
-              </Link>
+                </Link>
+                <Badge className="absolute top-4 left-4 shadow-lg">{product.category}</Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm hover:bg-background"
+                  onClick={() => toggleFavorite(product.id)}
+                >
+                  <Heart className={`h-4 w-4 ${favorites.has(product.id) ? 'fill-primary text-primary' : ''}`} />
+                </Button>
+              </div>
               
               <CardHeader>
                 <CardTitle className="text-xl">{product.name}</CardTitle>
@@ -89,7 +125,11 @@ const FeaturedProducts = () => {
               
               <CardFooter className="flex items-center justify-between">
                 <span className="text-2xl font-bold text-primary">${product.price}</span>
-                <Button size="sm" className="gap-2">
+                <Button 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => handleAddToCart(product)}
+                >
                   <ShoppingCart className="h-4 w-4" />
                   Add to Cart
                 </Button>
