@@ -59,6 +59,45 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          base_notes: string
+          category: string
+          created_at: string
+          heart_notes: string
+          id: string
+          image: string
+          name: string
+          price: number
+          top_notes: string
+          updated_at: string
+        }
+        Insert: {
+          base_notes: string
+          category: string
+          created_at?: string
+          heart_notes: string
+          id?: string
+          image: string
+          name: string
+          price: number
+          top_notes: string
+          updated_at?: string
+        }
+        Update: {
+          base_notes?: string
+          category?: string
+          created_at?: string
+          heart_notes?: string
+          id?: string
+          image?: string
+          name?: string
+          price?: number
+          top_notes?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string

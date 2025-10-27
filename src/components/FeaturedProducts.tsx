@@ -5,63 +5,39 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const products = [
-  {
-    id: 1,
-    name: "Noir Elegance",
-    category: "Oriental",
-    price: 120,
-    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&h=500&fit=crop",
-    notes: {
-      top: "Bergamot, Black Pepper",
-      heart: "Jasmine, Leather",
-      base: "Vanilla, Amber",
-    },
-  },
-  {
-    id: 2,
-    name: "Citrus Bloom",
-    category: "Fresh",
-    price: 95,
-    image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&h=500&fit=crop",
-    notes: {
-      top: "Lemon, Grapefruit",
-      heart: "Neroli, Green Tea",
-      base: "Cedar, Musk",
-    },
-  },
-  {
-    id: 3,
-    name: "Velvet Rose",
-    category: "Floral",
-    price: 110,
-    image: "https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=500&h=500&fit=crop",
-    notes: {
-      top: "Rose, Peony",
-      heart: "Violet, Peach",
-      base: "Sandalwood, Vanilla",
-    },
-  },
-  {
-    id: 4,
-    name: "Amber Woods",
-    category: "Woody",
-    price: 135,
-    image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=500&h=500&fit=crop",
-    notes: {
-      top: "Cardamom, Pink Pepper",
-      heart: "Amber, Patchouli",
-      base: "Cedarwood, Vetiver",
-    },
-  },
-];
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  image: string;
+  top_notes: string;
+  heart_notes: string;
+  base_notes: string;
+}
 
 const FeaturedProducts = () => {
   const { addItem, setIsCartOpen } = useCart();
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  const toggleFavorite = (id: number) => {
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: true });
+      
+      if (error) throw error;
+      return data as Product[];
+    },
+  });
+
+  const toggleFavorite = (id: string) => {
     setFavorites(prev => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
@@ -73,7 +49,7 @@ const FeaturedProducts = () => {
     });
   };
 
-  const handleAddToCart = (product: typeof products[0]) => {
+  const handleAddToCart = (product: Product) => {
     addItem({
       id: product.id,
       name: product.name,
@@ -84,6 +60,34 @@ const FeaturedProducts = () => {
     setIsCartOpen(true);
   };
 
+  if (isLoading) {
+    return (
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Featured Collection</h2>
+            <p className="text-muted-foreground text-lg">Our most loved fragrances</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="aspect-square w-full" />
+                <CardHeader>
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full mt-2" />
+                  <Skeleton className="h-4 w-full mt-1" />
+                </CardHeader>
+                <CardFooter>
+                  <Skeleton className="h-10 w-full" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
@@ -93,7 +97,7 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
+          {products?.map((product) => (
             <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20">
               <div className="relative overflow-hidden aspect-square">
                 <Link to={`/product/${product.id}`}>
@@ -117,9 +121,9 @@ const FeaturedProducts = () => {
               <CardHeader>
                 <CardTitle className="text-xl">{product.name}</CardTitle>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p><span className="font-medium">Top:</span> {product.notes.top}</p>
-                  <p><span className="font-medium">Heart:</span> {product.notes.heart}</p>
-                  <p><span className="font-medium">Base:</span> {product.notes.base}</p>
+                  <p><span className="font-medium">Top:</span> {product.top_notes}</p>
+                  <p><span className="font-medium">Heart:</span> {product.heart_notes}</p>
+                  <p><span className="font-medium">Base:</span> {product.base_notes}</p>
                 </div>
               </CardHeader>
               
