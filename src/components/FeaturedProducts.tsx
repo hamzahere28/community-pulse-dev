@@ -4,10 +4,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 interface Product {
   id: string;
@@ -22,20 +21,36 @@ interface Product {
 
 const FeaturedProducts = () => {
   const { addItem, setIsCartOpen } = useCart();
+  const { toast } = useToast();
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: true });
-      
-      if (error) throw error;
-      return data as Product[];
-    },
-  });
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        
+        setProducts(data || []);
+      } catch (error: any) {
+        console.error('Error fetching products:', error);
+        toast({
+          title: "Error loading products",
+          description: "Please try refreshing the page",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [toast]);
 
   const toggleFavorite = (id: string) => {
     setFavorites(prev => {
@@ -53,35 +68,20 @@ const FeaturedProducts = () => {
     addItem({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: parseFloat(String(product.price)),
       image: product.image,
       category: product.category,
     });
     setIsCartOpen(true);
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Featured Collection</h2>
-            <p className="text-muted-foreground text-lg">Our most loved fragrances</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[1, 2, 3, 4].map((i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="aspect-square w-full" />
-                <CardHeader>
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-full mt-2" />
-                  <Skeleton className="h-4 w-full mt-1" />
-                </CardHeader>
-                <CardFooter>
-                  <Skeleton className="h-10 w-full" />
-                </CardFooter>
-              </Card>
-            ))}
+            <p className="text-muted-foreground text-lg">Loading our fragrances...</p>
           </div>
         </div>
       </section>
@@ -97,7 +97,7 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products?.map((product) => (
+          {products.map((product) => (
             <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20">
               <div className="relative overflow-hidden aspect-square">
                 <Link to={`/product/${product.id}`}>
