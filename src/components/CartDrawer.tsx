@@ -10,6 +10,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { Minus, Plus, Trash2, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const CartDrawer = () => {
   const { items, removeItem, updateQuantity, totalPrice, isCartOpen, setIsCartOpen, clearCart } = useCart();
@@ -101,9 +102,13 @@ const CartDrawer = () => {
                 <Button variant="outline" onClick={clearCart}>
                   Clear Cart
                 </Button>
-                <Button>
-                  Checkout
-                </Button>
+                <DrawerClose asChild>
+                  <Link to="/checkout">
+                    <Button className="w-full">
+                      Checkout
+                    </Button>
+                  </Link>
+                </DrawerClose>
               </div>
             </div>
           </DrawerFooter>
