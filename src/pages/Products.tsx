@@ -148,7 +148,7 @@ const Products = () => {
                   </CardHeader>
                   
                   <CardFooter className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-primary">${product.price}</span>
+                    <span className="text-2xl font-bold text-primary">PKR {product.price.toLocaleString()}</span>
                     <Button 
                       size="sm" 
                       className="gap-2"

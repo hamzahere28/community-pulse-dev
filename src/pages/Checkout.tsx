@@ -178,7 +178,7 @@ const Checkout = () => {
               </Card>
 
               <Button type="submit" className="w-full" size="lg" disabled={isProcessing}>
-                {isProcessing ? "Processing..." : `Pay $${totalPrice.toFixed(2)}`}
+                {isProcessing ? "Processing..." : `Pay PKR ${totalPrice.toLocaleString()}`}
               </Button>
             </form>
           </div>
@@ -203,7 +203,7 @@ const Checkout = () => {
                         <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                       </div>
                       <div className="text-sm font-medium">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        PKR {(item.price * item.quantity).toLocaleString()}
                       </div>
                     </div>
                   ))}
@@ -213,7 +213,7 @@ const Checkout = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
-                      <span>${totalPrice.toFixed(2)}</span>
+                      <span>PKR {totalPrice.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Shipping</span>
@@ -222,7 +222,7 @@ const Checkout = () => {
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span className="text-primary">${totalPrice.toFixed(2)}</span>
+                      <span className="text-primary">PKR {totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>

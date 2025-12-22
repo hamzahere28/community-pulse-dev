@@ -22,7 +22,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t py-12">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div>
               <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Essence
@@ -59,6 +59,24 @@ const Index = () => {
                 <li><a href="/blog" className="hover:text-primary">Blog</a></li>
                 <li><a href="/careers" className="hover:text-primary">Careers</a></li>
                 <li><a href="/privacy" className="hover:text-primary">Privacy Policy</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Our Stores</h4>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li>
+                  <span className="font-medium text-foreground">Main Store</span>
+                  <p>Clifton, Karachi</p>
+                </li>
+                <li>
+                  <span className="font-medium text-foreground">North Nazimabad</span>
+                  <p>Block H, North Nazimabad, Karachi</p>
+                </li>
+                <li>
+                  <span className="font-medium text-foreground">Tariq Road</span>
+                  <p>Tariq Road, Karachi</p>
+                </li>
               </ul>
             </div>
           </div>
