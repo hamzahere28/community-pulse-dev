@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Heart, ShoppingCart, User, Menu, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,18 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { totalItems, setIsCartOpen } = useCart();
+  const navigate = useNavigate();
 
   const collections = [
     { name: "Floral Collection", href: "/category/floral", description: "Delicate and romantic scents" },
@@ -23,6 +31,14 @@ const Navbar = () => {
     { name: "Woody Collection", href: "/category/woody", description: "Warm and earthy notes" },
     { name: "Fresh Collection", href: "/category/fresh", description: "Light and invigorating" },
   ];
+
+  const handleWishlistClick = () => {
+    toast.info("Wishlist feature coming soon! Sign up to save your favorites.");
+  };
+
+  const handleLoginClick = () => {
+    toast.info("Authentication coming soon! Stay tuned.");
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -40,7 +56,7 @@ const Navbar = () => {
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>Collections</NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid w-[400px] gap-3 p-4">
+                    <div className="grid w-[400px] gap-3 p-4 bg-popover">
                       {collections.map((collection) => (
                         <Link
                           key={collection.name}
@@ -81,17 +97,38 @@ const Navbar = () => {
                 <Input
                   placeholder="Search fragrances..."
                   className="pl-8 w-[200px]"
+                  onFocus={() => navigate('/products')}
                 />
               </div>
             </div>
             
-            <Button variant="ghost" size="icon" className="hidden md:flex">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hidden md:flex"
+              onClick={handleWishlistClick}
+            >
               <Heart className="h-5 w-5" />
             </Button>
             
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <User className="h-5 w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="hidden md:flex">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-popover">
+                <DropdownMenuItem onClick={handleLoginClick} className="cursor-pointer">
+                  Sign In
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLoginClick} className="cursor-pointer">
+                  Create Account
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/contact')} className="cursor-pointer">
+                  Help & Support
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <Button 
               variant="ghost" 
@@ -127,7 +164,14 @@ const Navbar = () => {
           <div className="md:hidden py-4 space-y-4 border-t">
             <div className="relative mb-4">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search fragrances..." className="pl-8" />
+              <Input 
+                placeholder="Search fragrances..." 
+                className="pl-8" 
+                onFocus={() => {
+                  setMobileMenuOpen(false);
+                  navigate('/products');
+                }}
+              />
             </div>
             
             <div className="space-y-2">
@@ -157,6 +201,16 @@ const Navbar = () => {
               <Link to="/contact" className="block py-2 text-sm font-medium hover:text-primary">
                 Contact
               </Link>
+              <div className="border-t pt-4 mt-4 space-y-2">
+                <Button variant="outline" className="w-full gap-2" onClick={handleWishlistClick}>
+                  <Heart className="h-4 w-4" />
+                  Wishlist
+                </Button>
+                <Button variant="outline" className="w-full gap-2" onClick={handleLoginClick}>
+                  <User className="h-4 w-4" />
+                  Sign In / Register
+                </Button>
+              </div>
             </div>
           </div>
         )}
