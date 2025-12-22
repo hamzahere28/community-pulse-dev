@@ -54,7 +54,7 @@ const CartDrawer = () => {
                   <div className="flex-1">
                     <h4 className="font-semibold">{item.name}</h4>
                     <p className="text-sm text-muted-foreground">{item.category}</p>
-                    <p className="font-bold text-primary mt-1">${item.price}</p>
+                    <p className="font-bold text-primary mt-1">PKR {item.price.toLocaleString()}</p>
                   </div>
                   <div className="flex flex-col items-end justify-between">
                     <Button
@@ -96,7 +96,7 @@ const CartDrawer = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between text-lg font-bold">
                 <span>Total:</span>
-                <span className="text-primary">${totalPrice.toFixed(2)}</span>
+                <span className="text-primary">PKR {totalPrice.toLocaleString()}</span>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" onClick={clearCart}>

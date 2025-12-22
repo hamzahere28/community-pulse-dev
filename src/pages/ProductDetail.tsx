@@ -121,7 +121,7 @@ const ProductDetail = () => {
             <div>
               <Badge className="mb-4">{product.category}</Badge>
               <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
-              <p className="text-3xl font-bold text-primary mb-8">${product.price}</p>
+              <p className="text-3xl font-bold text-primary mb-8">PKR {product.price.toLocaleString()}</p>
 
               <div className="space-y-4 mb-8">
                 <div>
