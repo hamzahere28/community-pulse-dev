@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, User, Menu, X, Search } from "lucide-react";
+import { Heart, ShoppingCart, User, Menu, X, Search, Package, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,13 +18,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { totalItems, setIsCartOpen } = useCart();
+  const { user, profile, signOut, loading } = useAuth();
+  const { wishlistItems } = useWishlist();
   const navigate = useNavigate();
 
   const collections = [
@@ -32,12 +36,9 @@ const Navbar = () => {
     { name: "Fresh Collection", href: "/category/fresh", description: "Light and invigorating" },
   ];
 
-  const handleWishlistClick = () => {
-    toast.info("Wishlist feature coming soon! Sign up to save your favorites.");
-  };
-
-  const handleLoginClick = () => {
-    toast.info("Authentication coming soon! Stay tuned.");
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
   };
 
   return (
@@ -105,28 +106,66 @@ const Navbar = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="hidden md:flex"
-              onClick={handleWishlistClick}
+              className="hidden md:flex relative"
+              onClick={() => user ? navigate('/wishlist') : navigate('/auth')}
             >
               <Heart className="h-5 w-5" />
+              {wishlistItems.length > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {wishlistItems.length}
+                </Badge>
+              )}
             </Button>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="hidden md:flex">
-                  <User className="h-5 w-5" />
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-popover">
-                <DropdownMenuItem onClick={handleLoginClick} className="cursor-pointer">
-                  Sign In
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLoginClick} className="cursor-pointer">
-                  Create Account
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/contact')} className="cursor-pointer">
-                  Help & Support
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-56 bg-popover">
+                {user ? (
+                  <>
+                    <div className="px-2 py-2 text-sm">
+                      <p className="font-medium">{profile?.full_name || 'Welcome!'}</p>
+                      <p className="text-muted-foreground text-xs truncate">{user.email}</p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/wishlist')} className="cursor-pointer gap-2">
+                      <Heart className="h-4 w-4" />
+                      My Wishlist
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/orders')} className="cursor-pointer gap-2">
+                      <Package className="h-4 w-4" />
+                      My Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer gap-2 text-destructive">
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate('/auth')} className="cursor-pointer">
+                      Sign In
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/auth')} className="cursor-pointer">
+                      Create Account
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/contact')} className="cursor-pointer">
+                      Help & Support
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
             
@@ -175,7 +214,7 @@ const Navbar = () => {
             </div>
             
             <div className="space-y-2">
-              <Link to="/products" className="block py-2 text-sm font-medium hover:text-primary">
+              <Link to="/products" className="block py-2 text-sm font-medium hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
                 All Products
               </Link>
               <div className="py-2">
@@ -186,30 +225,55 @@ const Navbar = () => {
                       key={collection.name}
                       to={collection.href}
                       className="block py-1 text-sm text-muted-foreground hover:text-primary"
+                      onClick={() => setMobileMenuOpen(false)}
                     >
                       {collection.name}
                     </Link>
                   ))}
                 </div>
               </div>
-              <Link to="/about" className="block py-2 text-sm font-medium hover:text-primary">
+              <Link to="/about" className="block py-2 text-sm font-medium hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
                 Our Story
               </Link>
-              <Link to="/blog" className="block py-2 text-sm font-medium hover:text-primary">
+              <Link to="/blog" className="block py-2 text-sm font-medium hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
                 Fragrance Tips
               </Link>
-              <Link to="/contact" className="block py-2 text-sm font-medium hover:text-primary">
+              <Link to="/contact" className="block py-2 text-sm font-medium hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
                 Contact
               </Link>
+              
               <div className="border-t pt-4 mt-4 space-y-2">
-                <Button variant="outline" className="w-full gap-2" onClick={handleWishlistClick}>
-                  <Heart className="h-4 w-4" />
-                  Wishlist
-                </Button>
-                <Button variant="outline" className="w-full gap-2" onClick={handleLoginClick}>
-                  <User className="h-4 w-4" />
-                  Sign In / Register
-                </Button>
+                {user ? (
+                  <>
+                    <div className="px-2 py-2">
+                      <p className="font-medium text-sm">{profile?.full_name || 'Welcome!'}</p>
+                      <p className="text-muted-foreground text-xs">{user.email}</p>
+                    </div>
+                    <Button variant="outline" className="w-full gap-2" onClick={() => { navigate('/wishlist'); setMobileMenuOpen(false); }}>
+                      <Heart className="h-4 w-4" />
+                      Wishlist ({wishlistItems.length})
+                    </Button>
+                    <Button variant="outline" className="w-full gap-2" onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}>
+                      <Package className="h-4 w-4" />
+                      My Orders
+                    </Button>
+                    <Button variant="outline" className="w-full gap-2 text-destructive" onClick={handleSignOut}>
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" className="w-full gap-2" onClick={() => { navigate('/wishlist'); setMobileMenuOpen(false); }}>
+                      <Heart className="h-4 w-4" />
+                      Wishlist
+                    </Button>
+                    <Button className="w-full gap-2" onClick={() => { navigate('/auth'); setMobileMenuOpen(false); }}>
+                      <User className="h-4 w-4" />
+                      Sign In / Register
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
