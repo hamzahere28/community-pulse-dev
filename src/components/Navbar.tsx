@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, User, Menu, X, Search, Package, LogOut, Loader2 } from "lucide-react";
+import { Heart, ShoppingCart, User, Menu, X, Search, Package, LogOut, Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -146,6 +146,10 @@ const Navbar = () => {
                       <Package className="h-4 w-4" />
                       My Orders
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer gap-2">
+                      <Settings className="h-4 w-4" />
+                      Account Settings
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer gap-2 text-destructive">
                       <LogOut className="h-4 w-4" />
@@ -256,6 +260,10 @@ const Navbar = () => {
                     <Button variant="outline" className="w-full gap-2" onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}>
                       <Package className="h-4 w-4" />
                       My Orders
+                    </Button>
+                    <Button variant="outline" className="w-full gap-2" onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}>
+                      <Settings className="h-4 w-4" />
+                      Account Settings
                     </Button>
                     <Button variant="outline" className="w-full gap-2 text-destructive" onClick={handleSignOut}>
                       <LogOut className="h-4 w-4" />
