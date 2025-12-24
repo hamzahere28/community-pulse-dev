@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, User, Menu, X, Search, Package, LogOut, Loader2, Settings } from "lucide-react";
+import { Heart, ShoppingCart, User, Menu, X, Search, Package, LogOut, Loader2, Settings, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -24,10 +25,29 @@ import {
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { totalItems, setIsCartOpen } = useCart();
   const { user, profile, signOut, loading } = useAuth();
   const { wishlistItems } = useWishlist();
   const navigate = useNavigate();
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!data);
+    };
+    checkAdmin();
+  }, [user]);
 
   const collections = [
     { name: "Floral Collection", href: "/category/floral", description: "Delicate and romantic scents" },
@@ -150,6 +170,12 @@ const Navbar = () => {
                       <Settings className="h-4 w-4" />
                       Account Settings
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer gap-2 text-primary">
+                        <Shield className="h-4 w-4" />
+                        Admin Dashboard
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer gap-2 text-destructive">
                       <LogOut className="h-4 w-4" />
@@ -265,6 +291,12 @@ const Navbar = () => {
                       <Settings className="h-4 w-4" />
                       Account Settings
                     </Button>
+                    {isAdmin && (
+                      <Button variant="outline" className="w-full gap-2 text-primary" onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }}>
+                        <Shield className="h-4 w-4" />
+                        Admin Dashboard
+                      </Button>
+                    )}
                     <Button variant="outline" className="w-full gap-2 text-destructive" onClick={handleSignOut}>
                       <LogOut className="h-4 w-4" />
                       Sign Out
