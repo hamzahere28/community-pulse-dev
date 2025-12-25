@@ -4,6 +4,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,8 +23,9 @@ interface Product {
 
 const FeaturedProducts = () => {
   const { addItem, setIsCartOpen } = useCart();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,16 +55,21 @@ const FeaturedProducts = () => {
     fetchProducts();
   }, [toast]);
 
-  const toggleFavorite = (id: string) => {
-    setFavorites(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
+  const handleWishlistToggle = (productId: string) => {
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to add items to your wishlist",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
+    } else {
+      addToWishlist(productId);
+    }
   };
 
   const handleAddToCart = (product: Product) => {
@@ -112,9 +120,9 @@ const FeaturedProducts = () => {
                   variant="ghost"
                   size="icon"
                   className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm hover:bg-background"
-                  onClick={() => toggleFavorite(product.id)}
+                  onClick={() => handleWishlistToggle(product.id)}
                 >
-                  <Heart className={`h-4 w-4 ${favorites.has(product.id) ? 'fill-primary text-primary' : ''}`} />
+                  <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-primary text-primary' : ''}`} />
                 </Button>
               </div>
               
