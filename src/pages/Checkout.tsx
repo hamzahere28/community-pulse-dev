@@ -104,8 +104,35 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
+      // Send order confirmation email
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const userEmail = userData?.user?.email;
+        
+        if (userEmail) {
+          await supabase.functions.invoke('send-order-confirmation', {
+            body: {
+              email: userEmail,
+              customerName: `${formData.firstName} ${formData.lastName}`,
+              orderId: order.id,
+              orderItems: orderItems.map(item => ({
+                product_name: item.product_name,
+                quantity: item.quantity,
+                price: item.price,
+              })),
+              totalAmount: totalPrice,
+              shippingAddress: shippingAddress,
+            },
+          });
+          console.log("Order confirmation email sent");
+        }
+      } catch (emailError) {
+        console.error("Failed to send order confirmation email:", emailError);
+        // Don't fail the order if email fails
+      }
+
       toast.success("Order placed successfully!", {
-        description: "Thank you for your purchase. You can track your order in My Orders.",
+        description: "Thank you for your purchase. Check your email for confirmation.",
       });
       
       clearCart();
